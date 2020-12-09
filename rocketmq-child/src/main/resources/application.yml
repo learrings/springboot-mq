@@ -1,0 +1,15 @@
+com:
+  demo:
+    rocketmq:
+      server:
+        addr: 127.0.0.1:9876
+      producer:
+        group: demoProductGroup
+        topic: productTopic
+        tags: productTags
+      consumer:
+        group: demoConsumerGroup
+
+
+
+

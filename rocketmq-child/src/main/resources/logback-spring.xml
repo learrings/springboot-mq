@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+    <!-- 非必选节点：用于定义变量，方便使用。有两个属性：name,value。定义变量后，可以使用${}来使用变量。-->
+    <property name="LOG_HOME" value="./log"/>
+
+    <!--
+        设置节点： 用来格式化日志输出的节点，这个最重要。有两个属性：
+            name: appender的命名
+            class:指定输出策略，通常有两种：控制台输出(ch.qos.logback.core.ConsoleAppender)，文件输出(ch.qos.logback.core.rolling.RollingFileAppender)
+    -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度，%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 文件 滚动日志 (all)-->
+    <appender name="allFileLog"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 当前日志输出路径、文件名 -->
+        <file>${LOG_HOME}/file.log</file>
+        <!--日志输出格式-->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <!--历史日志归档策略-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 历史日志： 归档文件名 -->
+            <fileNamePattern>${log.path}/%d{yyyy-MM, aux}/all.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!--单个文件的最大大小-->
+            <maxFileSize>64MB</maxFileSize>
+            <!--日志文件保留天数-->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+
+    <!-- 文件 滚动日志 (仅error)-->
+    <appender name="errorFileLog"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 当前日志输出路径、文件名 -->
+        <file>${log.path}/error.log</file>
+        <!--日志输出格式-->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+
+        <!--历史日志归档策略-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 历史日志： 归档文件名 -->
+            <fileNamePattern>${log.path}/%d{yyyy-MM, aux}/error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!--单个文件的最大大小-->
+            <maxFileSize>64MB</maxFileSize>
+            <!--日志文件保留天数-->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+
+        <!-- 此日志文档只记录error级别的 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>error</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 控制com.demo.rocketmq.mapper下类的打印，使用console打印warn级别日志 -->
+    <!-- 设置addtivity是因为这里已经指定了appender，如果再向上传递就会被root下的appender再次打印 -->
+    <logger name="com.demo.rocketmq.mapper" level="debug" addtivity="false">
+        <appender-ref ref="console"/>
+    </logger>
+
+    <!--必选节点：用来指定最基础的日志输出级别，只有一个 level 属性，用于设置打印级别，可选如下：TRACE,DEBUG,INFO,WARN,ERROR,ALL,OFF。 -->
+    <root level="debug">
+        <appender-ref ref="console" />
+        <appender-ref ref="allFileLog" />
+        <appender-ref ref="errorFileLog" />
+    </root>
+
+</configuration>
